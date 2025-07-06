@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generación de Cadenas - Máquina de Turing</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    #output {
+      margin-top: 20px;
+      font-family: monospace;
+      white-space: pre;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Generador de Cadenas con Gramática Numérica</h2>
+
+<p>Introduce una cadena (como "123", "-45", "0"):</p>
+<input id="cadena" type="text" />
+<button onclick="validarCadena()">Validar y Mostrar Derivación</button>
+
+<div id="output"></div>
+
+<script>
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function mostrarDerivacion(pasos) {
+    const output = document.getElementById("output");
+    output.innerText = "";
+    for (let paso of pasos) {
+      output.innerText += paso + "\n";
+      await delay(1000);
+    }
+  }
+
+  function validarCadena() {
+    const entrada = document.getElementById("cadena").value.trim();
+    const derivacion = derivarCadena(entrada);
+
+    if (derivacion) {
+      mostrarDerivacion(derivacion);
+    } else {
+      alert("Cadena inválida según la gramática definida.");
+    }
+  }
+
+  function derivarCadena(cadena) {
+    let pasos = ["Numero"];
+    let signo = "";
+    let cuerpo = cadena;
+
+    if (cadena.startsWith("-")) {
+      signo = "-";
+      cuerpo = cadena.slice(1);
+      pasos.push("Signo NumeroSinSigno");
+      pasos.push("'-' NumeroSinSigno");
+    } else {
+      pasos.push("Signo NumeroSinSigno");
+      pasos.push("λ NumeroSinSigno");
+    }
+
+    if (cuerpo === "0") {
+      pasos.push("'0'");
+      pasos.push(`⇒ "${cadena}"`);
+      return pasos;
+    }
+
+    if (/^[1-9][0-9]*$/.test(cuerpo)) {
+      pasos.push("DigitoNoCero Digitos");
+      pasos.push(`'${cuerpo[0]}' Digitos`);
+      let resto = cuerpo.slice(1);
+      for (let i = 0; i < resto.length; i++) {
+        pasos.push(`'${cuerpo[0]}' ${resto.slice(0, i + 1)} Digitos`);
+      }
+      pasos.push(`⇒ "${signo}${cuerpo}"`);
+      return pasos;
+    }
+
+    return null;
+  }
+</script>
+
+
+<footer style="margin-top: 40px; font-style: italic; text-align: center; color: #555;">
+  Presentado por Dilsa Barrientos
+</footer>
+</body>
+
+</html>
